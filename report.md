@@ -1,4 +1,4 @@
-# Predicting Object Categories from Limited Labelled Data: Comparing MLP, CNN, and Transfer Learning Approaches on STL-10
+# Predicting Object Categories from Limited Labelled Data
 
 *A comparative study of neural network architectures for image classification, examining the effects of regularisation, pretrained feature transfer, and model ensembling on a data-scarce object recognition task.*
 
