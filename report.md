@@ -67,7 +67,7 @@ Two separate transform pipelines are used because scratch models and pretrained 
 
 **ResNet18:** The entire backbone is frozen and only the final fully-connected layer (.fc, 5,130 parameters) is replaced. ResNet18 has no Dropout in its architecture, so the frozen-backbone approach works cleanly.
 
-**Ensemble:** The softmax probability vectors from AlexNet and ResNet18 are averaged element-wise, and the class with the highest average probability is selected. This requires no additional training — just one extra forward pass at inference time.
+**Ensemble:** The softmax probability vectors from AlexNet and ResNet18 are averaged element-wise, and the class with the highest average probability is selected. This requires no additional training.
 
 ### 3.3 Training Configuration
 
@@ -82,7 +82,7 @@ Two separate transform pipelines are used because scratch models and pretrained 
 
 ### 3.4 Data Leakage Prevention
 
-The test set is evaluated every epoch for monitoring purposes, but no training decisions — early stopping, model checkpointing, hyperparameter tuning — are based on test metrics. The epoch count is fixed in advance. Final-epoch accuracy is reported, not best-epoch accuracy, because selecting the best epoch retroactively based on test performance would constitute data leakage.
+The test set is evaluated every epoch for monitoring purposes, but no training decisions are based on test metrics. The epoch count is fixed in advance. Final-epoch accuracy is reported, not best-epoch accuracy, because selecting the best epoch retroactively based on test performance would constitute data leakage.
 
 ---
 
@@ -100,7 +100,7 @@ These two metrics can diverge in important ways:
 
 **Falling test loss with flat accuracy:** The model isn't flipping more predictions from wrong to right, but its confidence in correct predictions is improving — a sign of healthy learning.
 
-In our experiments, the no-reg MLP demonstrates the first pattern: test accuracy plateaus around 45% while test loss rises from 1.83 to 1.95 between epochs 10 and 30. The regularised MLP's test loss keeps falling (1.86 to 1.53) throughout training, indicating that Dropout prevents the confidence degradation. This makes test loss a more sensitive diagnostic for overfitting than accuracy alone.
+In our experiments, the no-reg MLP demonstrates the first pattern: test accuracy plateaus around 45% while test loss rises from 1.67 → 1.95 between epochs 10 and 30. The regularised MLP's test loss keeps falling (1.86 to 1.53) throughout training, indicating that Dropout prevents the confidence degradation. This makes test loss a more sensitive diagnostic for overfitting than accuracy alone.
 
 ---
 
@@ -118,7 +118,7 @@ The CNN succeeds because it encodes three prior assumptions about images: (1) lo
 
 **CNN:** BatchNorm stabilises gradient flow (accelerating convergence) and acts as a mild regulariser. The regularised CNN typically starts at higher accuracy in epoch 1 and reaches a higher final accuracy. Dropout(0.25) provides additional protection against feature co-adaptation.
 
-### 5.3 Transfer Learning — Domain Match Matters
+### 5.3 Transfer Learning 
 
 STL-10 contains natural object photos — the same domain as ImageNet. The pretrained backbone's features (edges, textures, shapes, object parts learned from 1.2 million images) are directly relevant to STL-10's classification task.
 
@@ -128,25 +128,12 @@ With only 5,000 training images, from-scratch models cannot learn rich visual fe
 
 By averaging the softmax probabilities of AlexNet and ResNet18, the ensemble achieves higher accuracy than either model alone. This works because the two architectures make partially uncorrelated errors — AlexNet's large-filter features (11×11, 5×5) and ResNet18's small-filter features with residual connections (3×3) capture different aspects of the images.
 
-The ensemble requires no additional training. It is a post-hoc combination at inference time. Even a modest accuracy gain demonstrates the principle that diverse models combined outperform any individual model — a foundational idea in machine learning (related to bagging, boosting, and the bias-variance decomposition).
+The ensemble requires no additional training. It is a post-hoc combination at inference time. Even a modest accuracy gain demonstrates the principle that diverse models combined outperform any individual model.
 
 ---
 
-## 6. Connection to Course Materials
 
-| Worksheet Exercise | What This Project Does |
-|-------------------|----------------------|
-| Exercise 4: MLP vs CNN parameter count | MLP (14.3M) vs CNN (198K) = 72× ratio on STL-10 |
-| Exercise 5: Fine-tune AlexNet | AlexNet with classifier unfrozen on STL-10 |
-| Exercise 6: Fine-tune ResNet18 | ResNet18 with frozen backbone, .fc replaced on STL-10 |
-| Question 1: Why flattening hurts | MLP's 27,648-input first layer demonstrates the cost |
-| Question 4: Pooling for invariance | AdaptiveAvgPool2d(4,4) reduces 24×24 → 4×4 |
-| Tutorial 5: Dropout in MLPs | Before/after comparison with Dropout(0.2) |
-| Tutorial 6: BatchNorm in CNNs | Before/after comparison with BatchNorm + Dropout |
-
----
-
-## 7. Conclusions
+## 6. Conclusions
 
 Four lessons emerge from this experiment, each visible because of STL-10's small training set:
 
@@ -166,4 +153,4 @@ Taken together, these results illustrate a hierarchy of importance for data-scar
 
 All random seeds are fixed (torch.manual_seed(42), np.random.seed(42)). CPU runs are exactly reproducible; GPU runs may vary by ±1% due to non-deterministic GPU kernels.
 
-To reproduce: install dependencies from requirements.txt, open mlp_vs_cnn_stl10.ipynb in Jupyter, and select Kernel → Restart & Run All. The first run downloads ~2.6 GB of data. No API keys or external services are required.
+To reproduce: install dependencies from requirements.txt, open Deep_Learning_Project.ipynb in Jupyter, and select Kernel → Restart & Run All. The first run downloads ~2.6 GB of data. No API keys or external services are required.

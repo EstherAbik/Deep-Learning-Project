@@ -8,7 +8,7 @@ This project answers three questions about deep learning for image classificatio
 
 1. **Does network architecture matter?** We compare a Multi-Layer Perceptron (MLP) against a Convolutional Neural Network (CNN) on the same images. The MLP has 72× more parameters but the CNN wins — because convolutions encode the right assumptions about how images work.
 
-2. **Does regularisation help when data is limited?** We train each model twice — once without regularisation, once with Dropout and BatchNorm — and compare the overfitting behaviour. With only 5,000 training images, the difference is dramatic.
+2. **Does regularisation help when data is limited?** We train each model twice — once without regularisation, once with Dropout and BatchNorm — and compare the overfitting behaviour. With only 5,000 training images, there is improvement with regularization.
 
 3. **Can pretrained models rescue a small dataset?** We fine-tune AlexNet and ResNet18 (pretrained on 1.2 million ImageNet photos) on our 5,000 STL-10 images, then combine them into an **ensemble** for an additional accuracy boost.
 
@@ -44,11 +44,11 @@ We chose STL-10 because its small training set makes overfitting visible, transf
 
 ### Why the ensemble works
 
-AlexNet uses large 11×11 filters; ResNet18 uses 3×3 filters with skip connections. They learn different features and make different mistakes. Averaging their softmax probabilities smooths out individual errors — no extra training needed, just one additional forward pass at inference.
+AlexNet uses large 11×11 filters; ResNet18 uses 3×3 filters with skip connections. They learn different features and make different mistakes. Averaging their softmax probabilities smooths out individual errors.
 
 ### Why AlexNet's classifier is unfrozen
 
-AlexNet's classifier has Dropout(0.5) layers. When the Linear layers underneath are frozen, the Dropout corrupts the signal without the model being able to adapt. We unfreeze the entire classifier (keeping conv features frozen) to fix this. ResNet18 has no Dropout, so frozen-backbone works cleanly.
+AlexNet's classifier has Dropout(0.5) layers. When the Linear layers underneath are frozen, the Dropout corrupts the signal without the model being able to adapt. The entire classifier (keeping conv features frozen) is unfrozen to fix this. ResNet18 has no Dropout, so frozen-backbone works cleanly.
 
 ---
 
@@ -83,9 +83,9 @@ jupyter Deep_Learning_Project.ipynb
 ## Project Structure
 
 ```
-├── README.md                  ← you are here
+├── README.md                 
 ├── requirements.txt           ← pip install -r requirements.txt
-├── report.md                  ← standalone project report
+├── report.md                  ← project report
 └── Deep_Learning_Project.ipynb     ← main analysis notebook (58 cells)
 ```
 
@@ -122,11 +122,11 @@ jupyter Deep_Learning_Project.ipynb
 | Scratch normalisation | STL-10 stats | Dataset-specific |
 | Pretrained normalisation | ImageNet stats | Required by backbone |
 | Augmentation | RandomCrop(padding=4) + HorizontalFlip | Valid for natural objects |
-| Scratch epochs | 30 | Enough to see overfitting |
+| Scratch epochs | 30 | at least 20 epochs chosen |
 | Pretrained epochs | 10 | Converges faster with pretrained features |
 | AlexNet LR | 1e-4 | Protects pretrained classifier weights |
 | CNN pooling | AdaptiveAvgPool2d(4,4) | Keeps classifier head compact |
-| Ensemble | Average softmax probs | No extra training, combines diverse predictions |
+| Ensemble | Average softmax probs |  combines diverse predictions |
 
 ### Data leakage prevention
 
